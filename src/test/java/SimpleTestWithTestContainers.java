@@ -1,3 +1,6 @@
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoDatabase;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -11,8 +14,8 @@ public class SimpleTestWithTestContainers {
     public GenericContainer mongoDb = new GenericContainer(DockerImageName.parse("mongo:4.0.10")).withExposedPorts(27017);
 
     @Test
-    public void testSimplePutAndGet() {
-        System.out.println(mongoDb.getContainerId());
-        System.out.println(mongoDb.getContainerName());
+    public void test() {
+        MongoClient client = MongoClients.create("mongodb://localhost:" + mongoDb.getFirstMappedPort());
+        client.listDatabaseNames().forEach(System.out::println);
     }
 }
