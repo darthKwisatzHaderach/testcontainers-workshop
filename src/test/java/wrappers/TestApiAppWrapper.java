@@ -1,13 +1,23 @@
 package wrappers;
 
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.images.builder.dockerfile.DockerfileBuilder;
 
 public class TestApiAppWrapper  extends GenericContainer<TestApiAppWrapper> {
     public static final String SERVICE_NAME = "test-api-app";
 
-    private static ImageFromDockerfile buildImage(String serviceName) {
+    public TestApiAppWrapper() {
+        super(buildImage());
+
+        this.withCreateContainerCmdModifier(cmd -> cmd.withName(SERVICE_NAME));
+        this.waitingFor(
+                Wait.forLogMessage(".*Started Application in .* seconds.*", 1)
+        );
+    }
+
+    private static ImageFromDockerfile buildImage() {
         String imageName = "arm64v8/openjdk:11-jdk";
         String jarFileName = "api.jar";
 
