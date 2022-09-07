@@ -28,7 +28,7 @@ public class SimpleTestWithTestContainers {
         mongoContainer = new MongoContainerWrapper(network);
         mongoContainer.start();
 
-        testApiAppContainer = new TestApiAppWrapper(network);
+        testApiAppContainer = new TestApiAppWrapper(network, mongoContainer.getInternalUri());
         testApiAppContainer.start();
     }
 

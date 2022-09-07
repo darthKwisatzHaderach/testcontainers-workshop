@@ -6,11 +6,15 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.images.builder.dockerfile.DockerfileBuilder;
 
-public class TestApiAppWrapper  extends GenericContainer<TestApiAppWrapper> {
+import java.util.Map;
+
+import static java.util.Map.entry;
+
+public class TestApiAppWrapper extends GenericContainer<TestApiAppWrapper> {
     public static final String SERVICE_NAME = "test-api-app";
 
-    public TestApiAppWrapper(Network network) {
-        super(buildImage());
+    public TestApiAppWrapper(Network network, String datasourceUrl) {
+        super(buildImage(Map.ofEntries(entry("spring.datasource.url", datasourceUrl))));
 
         this.withNetwork(network);
         this.withExposedPorts(8080);
@@ -20,22 +24,23 @@ public class TestApiAppWrapper  extends GenericContainer<TestApiAppWrapper> {
         );
     }
 
-    private static ImageFromDockerfile buildImage() {
+    private static ImageFromDockerfile buildImage(Map env) {
         String imageName = "arm64v8/openjdk:18-jdk";
         String jarFileName = "api-mongo.jar";
 
         ImageFromDockerfile imageFromDockerfile = new ImageFromDockerfile(imageName)
-                .withFileFromString("Dockerfile", buildDockerfile(imageName, jarFileName))
+                .withFileFromString("Dockerfile", buildDockerfile(imageName, env, jarFileName))
                 .withFileFromClasspath(jarFileName, jarFileName);
 
         return imageFromDockerfile;
     }
 
-    private static String buildDockerfile(String imageName, String jarFileName) {
+    private static String buildDockerfile(String imageName, Map env, String jarFileName) {
         DockerfileBuilder builder = new DockerfileBuilder();
 
         builder
                 .from(imageName)
+                .env(env)
                 .copy(jarFileName, jarFileName)
                 .entryPoint("java", "-jar", "/" + jarFileName);
 
