@@ -11,14 +11,15 @@ public class TestApiAppWrapper  extends GenericContainer<TestApiAppWrapper> {
     public TestApiAppWrapper() {
         super(buildImage());
 
+        this.withExposedPorts(8080);
         this.withCreateContainerCmdModifier(cmd -> cmd.withName(SERVICE_NAME));
         this.waitingFor(
-                Wait.forLogMessage(".*Started Application in .* seconds.*", 1)
+                Wait.forLogMessage(".*Started ApiApplication in .* seconds.*", 1)
         );
     }
 
     private static ImageFromDockerfile buildImage() {
-        String imageName = "arm64v8/openjdk:11-jdk";
+        String imageName = "arm64v8/openjdk:18-jdk";
         String jarFileName = "api.jar";
 
         ImageFromDockerfile imageFromDockerfile = new ImageFromDockerfile(imageName)
