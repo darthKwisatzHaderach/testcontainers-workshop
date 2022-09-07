@@ -24,6 +24,10 @@ public class TestApiAppWrapper extends GenericContainer<TestApiAppWrapper> {
         );
     }
 
+    public String getBooksUrl() {
+        return "http://localhost:" + this.getFirstMappedPort() + "/books";
+    }
+
     private static ImageFromDockerfile buildImage(Map env) {
         String imageName = "arm64v8/openjdk:18-jdk";
         String jarFileName = "api-mongo.jar";
