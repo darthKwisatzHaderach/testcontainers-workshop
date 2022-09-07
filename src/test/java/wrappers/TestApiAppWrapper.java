@@ -1,6 +1,7 @@
 package wrappers;
 
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.images.builder.dockerfile.DockerfileBuilder;
@@ -8,9 +9,10 @@ import org.testcontainers.images.builder.dockerfile.DockerfileBuilder;
 public class TestApiAppWrapper  extends GenericContainer<TestApiAppWrapper> {
     public static final String SERVICE_NAME = "test-api-app";
 
-    public TestApiAppWrapper() {
+    public TestApiAppWrapper(Network network) {
         super(buildImage());
 
+        this.withNetwork(network);
         this.withExposedPorts(8080);
         this.withCreateContainerCmdModifier(cmd -> cmd.withName(SERVICE_NAME));
         this.waitingFor(
@@ -20,7 +22,7 @@ public class TestApiAppWrapper  extends GenericContainer<TestApiAppWrapper> {
 
     private static ImageFromDockerfile buildImage() {
         String imageName = "arm64v8/openjdk:18-jdk";
-        String jarFileName = "api.jar";
+        String jarFileName = "api-mongo.jar";
 
         ImageFromDockerfile imageFromDockerfile = new ImageFromDockerfile(imageName)
                 .withFileFromString("Dockerfile", buildDockerfile(imageName, jarFileName))
