@@ -3,18 +3,17 @@ package wrappers;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.images.builder.ImageFromDockerfile;
-import org.testcontainers.images.builder.dockerfile.DockerfileBuilder;
 
 import java.util.Map;
 
 import static java.util.Map.entry;
 
 public class TestApiAppWrapper extends GenericContainer<TestApiAppWrapper> {
-    public static final String SERVICE_NAME = "test-api-app";
+    private static final String SERVICE_NAME = "test-api-app";
+    private static String jarFileName = "api-mongo.jar";
 
     public TestApiAppWrapper(Network network, String datasourceUrl) {
-        super(buildImage(Map.ofEntries(entry("spring.datasource.url", datasourceUrl))));
+        super(DockerImageBuilder.buildImage(Map.ofEntries(entry("spring.datasource.url", datasourceUrl)), jarFileName));
 
         this.withNetwork(network);
         this.withExposedPorts(8080);
@@ -27,30 +26,6 @@ public class TestApiAppWrapper extends GenericContainer<TestApiAppWrapper> {
     public String getBooksUrl() {
         return "http://localhost:" + this.getFirstMappedPort() + "/books";
     }
-
-    private static ImageFromDockerfile buildImage(Map env) {
-        String imageName = "arm64v8/openjdk:18-jdk";
-        String jarFileName = "api-mongo.jar";
-
-        ImageFromDockerfile imageFromDockerfile = new ImageFromDockerfile(imageName)
-                .withFileFromString("Dockerfile", buildDockerfile(imageName, env, jarFileName))
-                .withFileFromClasspath(jarFileName, jarFileName);
-
-        return imageFromDockerfile;
-    }
-
-    private static String buildDockerfile(String imageName, Map env, String jarFileName) {
-        DockerfileBuilder builder = new DockerfileBuilder();
-
-        builder
-                .from(imageName)
-                .env(env)
-                .copy(jarFileName, jarFileName)
-                .entryPoint("java", "-jar", "/" + jarFileName);
-
-        return builder.build();
-    }
-
 }
 
 /*
